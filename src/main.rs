@@ -1,4 +1,4 @@
-use clap::{Arg, Command};
+use clap::Arg;
 use clap_help::Printer;
 use futures_util::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -16,6 +16,8 @@ use sys_locale::get_locale;
 use tokio;
 use tokio::task::spawn_blocking;
 use zip::read::ZipArchive;
+use std::process::{Command, Stdio};
+
 
 const FIVEM_FXSERVER_LINK: &str =
     "https://changelogs-live.fivem.net/api/changelog/versions/win32/server";
@@ -231,17 +233,22 @@ async fn download_fxserver_and_extract(artifacts_path: &PathBuf) -> Result<(), S
     Ok(())
 }
 
+
 fn start_fxserver(fxpath: &PathBuf, workdir: &PathBuf, fxconfig: &PathBuf, args: &str) {
     println!("{}", t!("info.starting_fxserver"));
-    let cmd = std::process::Command::new(fxpath.to_str().unwrap())
+    let mut child = Command::new(fxpath.to_str().unwrap())
         .current_dir(workdir)
         .arg("+exec")
         .arg(fxconfig.to_str().unwrap())
         .arg(args.replace("\"", ""))
-        .spawn();
-
-    cmd.expect(&t!("error.failed_to_start_fxserver"));
+        .stdin(Stdio::inherit())  // Permite entrada diretamente pelo terminal
+        .stdout(Stdio::inherit()) // Permite saída no terminal
+        .stderr(Stdio::inherit()) // Permite erros no terminal
+        .spawn()
+        .expect(&t!("error.failed_to_start_fxserver"));
+    let _ = child.wait(); // Aguarda o processo terminar
 }
+
 
 #[tokio::main]
 async fn main() {
@@ -250,7 +257,7 @@ async fn main() {
     let mut enabled_auto_update = true;
 
     set_locale(&get_locale().unwrap_or_else(|| String::from("en")));
-    let cmd = Command::new("fivem-update.exe")
+    let cmd = clap::Command::new("fivem-update.exe")
         .version("1.0")
         .author("Swellington Soares")
         .arg(
@@ -265,11 +272,11 @@ async fn main() {
                 .help(t!("cli.fx_help").to_string()),
         )
         .subcommand(
-            Command::new("disable-auto-update")
+            clap::Command::new("disable-auto-update")
                 .about(t!("cli.disable_auto_update_help").to_string()),
         )
-        .subcommand(Command::new("fx-version").about(t!("cli.verify_version_help").to_string()))
-        .subcommand(Command::new("check-version").about(t!("cli.check_version_help").to_string()));
+        .subcommand(clap::Command::new("fx-version").about(t!("cli.verify_version_help").to_string()))
+        .subcommand(clap::Command::new("check-version").about(t!("cli.check_version_help").to_string()));
 
     let args = cmd.clone().get_matches();
 
