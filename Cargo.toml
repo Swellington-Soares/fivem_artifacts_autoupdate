@@ -1,7 +1,7 @@
 [package]
-name = "fivem-update"
+name = "fivem_update"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.31", features = ["derive"] }
@@ -11,8 +11,9 @@ indicatif = "0.15.0"
 tempfile = "3.3"
 regex = "1.11.1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
-sevenz-rust = { version = "0.6.1" }
 serde = { version = "1.0.219", features = ["derive"] }
 serde-aux = "4.6.0"
 zip = "2.2.3"
-
+rust-i18n = "3.1.3"
+sys-locale = "0.3.2"
+clap-help = "1.3.2"
