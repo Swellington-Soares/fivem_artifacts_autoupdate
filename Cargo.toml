@@ -1,7 +1,9 @@
 [package]
 name = "fivem_update"
-version = "0.1.0"
-edition = "2021"
+version = "0.1.6"
+edition = "2024"
+build = "build.rs"
+
 
 [dependencies]
 clap = { version = "4.5.31", features = ["derive"] }
@@ -17,3 +19,9 @@ zip = "2.2.3"
 rust-i18n = "3.1.3"
 sys-locale = "0.3.2"
 clap-help = "1.3.2"
+
+[package.metadata.winres]
+original_filename = "fvem_update.exe"
+
+[build-dependencies]
+embed-resource = "3.0.2"
